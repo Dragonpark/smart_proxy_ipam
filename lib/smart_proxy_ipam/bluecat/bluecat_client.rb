@@ -52,43 +52,26 @@ module Proxy::Bluecat
       return subnet if json_body['results']
     end
 
-    def get_ipam_groups
-      response = @api_resource.get('ipam/vrfs/')
-      json_body = JSON.parse(response.body)
-      groups = []
+    def get_ipam_confid(group_name)
+      return nil if group_name.nil?
+      params = URI.encode_www_form({ parentId: 0, name: group_name, type: 'Configuration' })
+      group = @api_resource.get("getEntityByName/#{params}/")
+      json_body = JSON.parse(group.body)
+      raise ERRORS[:no_group] if json_body['data'].nil?
 
-      return groups if json_body['count'].zero?
-
-      json_body['results'].each do |group|
-        groups.push({
-          name: group['name'],
-          description: group['description']
-        })
-      end
-
-      groups
-    end
-
-    def get_ipam_group(group_name)
-      raise ERRORS[:groups_not_supported] unless groups_supported?
-      # TODO: Fix encoding of params in a common way for all providers
-      params = URI.encode_www_form({ name: URI.decode(group_name) })
-      response = @api_resource.get("ipam/vrfs/?#{params}")
-      json_body = JSON.parse(response.body)
-      return nil if json_body['count'].zero?
-
-      group = {
-        id: json_body['results'][0]['id'],
-        name: json_body['results'][0]['name'],
-        description: json_body['results'][0]['description']
+      data = {
+        id: json_body['id'],
+        name: json_body['name'],
+        type: json_body['type'],
+        properties: json_body['properties']
       }
 
-      return group if json_body['results']
+      return data if json_body['data']
     end
-
+    
     def get_group_id(group_name)
       return nil if group_name.nil? || group_name.empty?
-      group = get_ipam_group(group_name)
+      group = get_ipam_confid(group_name)
       raise ERRORS[:no_group] if group.nil?
       group[:id]
     end
@@ -116,17 +99,6 @@ module Proxy::Bluecat
       end
 
       return subnets if json_body['results']
-    end
-
-    def ip_exists?(ip, subnet_id, group_name)
-      group_id = get_group_id(group_name)
-      url = "ipam/ip-addresses/?#{URI.encode_www_form({ address: ip })}"
-      url += "&#{URI.encode_www_form({ prefix_id: subnet_id })}" unless subnet_id.nil?
-      url += "&#{URI.encode_www_form({ vrf_id: group_id })}" unless group_id.nil?
-      response = @api_resource.get(url)
-      json_body = JSON.parse(response.body)
-      return false if json_body['count'].zero?
-      true
     end
 
     def add_ip_to_subnet(ip, params)
