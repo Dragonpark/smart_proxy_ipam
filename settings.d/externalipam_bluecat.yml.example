@@ -1,4 +1,5 @@
 ---
 :url: 'https://bam.example.com'
+:default_group: 1
 :user: 'bluecat_user'
 :password: 'bluecat_password'

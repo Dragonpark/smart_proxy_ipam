@@ -18,6 +18,7 @@ module Proxy::Bluecat
 
     def initialize(conf)
       @api_base = "#{conf[:url]}/Services/REST/v1/"
+      @default_group = "#{conf[:default_group]}"
       @token = authenticate
       @api_resource = Proxy::Ipam::ApiResource.new(api_base: @api_base, token: "#{@token}")
       @ip_cache = Proxy::Ipam::IpCache.instance
@@ -26,36 +27,27 @@ module Proxy::Bluecat
 
     def get_ipam_subnet(cidr, group_name = nil)
       if group_name.nil? || group_name.empty?
-        get_ipam_subnet_by_cidr(cidr)
+        group_id =  get_group_id(@default_group)
       else
         group_id = get_group_id(group_name)
-        get_ipam_subnet_by_group(cidr, group_id)
       end
-    end
 
-    def get_ipam_subnet_by_group(cidr, group_id)
-      params = URI.encode_www_form({ status: 'active', prefix: cidr, vrf_id: group_id })
-      response = @api_resource.get("ipam/prefixes/?#{params}")
-      json_body = JSON.parse(response.body)
-      return nil if json_body['count'].zero?
-      subnet = subnet_from_result(json_body['results'][0])
-      return subnet if json_body['results']
+      get_ipam_subnet_by_cidr(cidr, group_id)
     end
 
     def get_ipam_subnet_by_cidr(cidr)
-      network_addr = cidr.split('/')[0]
-      params = URI.encode_www_form({ type: 'IP4Network', address: network_addr, containerId: 5 })
-      response = @api_resource.get("getIPRangedByIP/?#{params}")
+      params = URI.encode_www_form({ types: 'IP4Network', keyword: cidr, count: 10, start: 0 })
+      response = @api_resource.get("searchByObjectTypes/?#{params}")
       json_body = JSON.parse(response.body)
       return nil if json_body['count'].zero?
       subnet = subnet_from_result(json_body['results'][0])
       return subnet if json_body['results']
     end
 
-    def get_ipam_confid(group_name)
+    def get_ipam_group(group_name)
       return nil if group_name.nil?
       params = URI.encode_www_form({ parentId: 0, name: group_name, type: 'Configuration' })
-      group = @api_resource.get("getEntityByName/#{params}/")
+      group = @api_resource.get("getEntityByName/#{params}")
       json_body = JSON.parse(group.body)
       raise ERRORS[:no_group] if json_body['data'].nil?
 
@@ -71,82 +63,45 @@ module Proxy::Bluecat
     
     def get_group_id(group_name)
       return nil if group_name.nil? || group_name.empty?
-      group = get_ipam_confid(group_name)
+      group = get_ipam_group(group_name)
       raise ERRORS[:no_group] if group.nil?
       group[:id]
     end
 
-    def get_ipam_subnets(group_name)
-      if group_name.nil?
-        params = URI.encode_www_form({ status: 'active' })
-      else
-        group_id = get_group_id(group_name)
-        params = URI.encode_www_form({ status: 'active', vrf_id: group_id })
-      end
-
-      response = @api_resource.get("ipam/prefixes/?#{params}")
-      json_body = JSON.parse(response.body)
-      return nil if json_body['count'].zero?
-      subnets = []
-
-      json_body['results'].each do |subnet|
-        subnets.push({
-          subnet: subnet['prefix'].split('/').first,
-          mask: subnet['prefix'].split('/').last,
-          description: subnet['description'],
-          id: subnet['id']
-        })
-      end
-
-      return subnets if json_body['results']
-    end
-
-    def add_ip_to_subnet(ip, params)
+    def add_ip_to_subnet(ip, params)       #WIP
       desc = 'Address auto added by Foreman'
-      address = "#{ip}/#{params[:cidr].split('/').last}"
-      group_name = params[:group_name]
+      group_id = get_group_id(params[:group_name])
+      properties = "Notes=Address auto added by Foreman|name="
+      params = URI.encode_www_form({ action: 'MAKE_STATIC', configurationId: group_id, hostInfo: '', ip4Address: ip, properties: 'Notes=Created by Foreman' })
 
-      if group_name.nil? || group_name.empty?
-        data = { address: address, nat_outside: 0, description: desc }
-      else
-        group_id = get_group_id(group_name)
-        data = { vrf: group_id, address: address, nat_outside: 0, description: desc }
-      end
-
-      response = @api_resource.post('ipam/ip-addresses/', data.to_json)
-      return nil if response.code == '201'
+      response = @api_resource.post("assignIP4Address/#{params}")
+      return nil if response.code != '200'
       { error: "Unable to add #{address} in External IPAM server" }
     end
 
     def delete_ip_from_subnet(ip, params)
-      group_name = params[:group_name]
-
-      if group_name.nil? || group_name.empty?
-        params = URI.encode_www_form({ address: ip })
-      else
-        group_id = get_group_id(group_name)
-        params = URI.encode_www_form({ address: ip, vrf_id: group_id })
-      end
-
-      response = @api_resource.get("ipam/ip-addresses/?#{params}")
+      params = URI.encode_www_form({ types: 'IP4Address', keyword: ip, count: 10, start: 0 })
+      
+      response = @api_resource.delete("searchByObjectTypes/?#{params}")
       json_body = JSON.parse(response.body)
 
       return { error: ERRORS[:no_ip] } if json_body['count'].zero?
 
-      address_id = json_body['results'][0]['id']
-      response = @api_resource.delete("ipam/ip-addresses/#{address_id}/")
-      return nil if response.code == '204'
+      address_id = json_body[0]['id']
+      params = URI.encode_www_form({ objectId: address_id})
+      response = @api_resource.delete("delete/#{params}/")
+      return nil if response.code != '200'
       { error: "Unable to delete #{ip} in External IPAM server" }
     end
 
     def get_next_ip(mac, cidr, group_name)
       subnet = get_ipam_subnet(cidr, group_name)
       raise ERRORS[:no_subnet] if subnet.nil?
-      params = URI.encode_www_form(parentId: subnet['parentId'.to_sym])
+      params = URI.encode_www_form({ parentId: subnet['parentId'] })
       response = @api_resource.get("getNextAvailableIP4Address/?#{params}")
       json_body = JSON.parse(response.body)
       return nil if json_body.empty?
-      ip = json_body[0]['address'].split('/').first
+      ip = json_body
       next_ip = cache_next_ip(@ip_cache, ip, mac, cidr, subnet[:id], group_name)
       { data: next_ip }
     end
