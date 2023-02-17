@@ -48,7 +48,7 @@ module Proxy::Bluecat
 
     def get_ipam_group(group_name)
       return nil if group_name.nil?
-      params = URI.encode_www_form({ parentId: 0, name: group_name, type: 'Configuration' })
+      params = URI.encode_www_form({ parentId: 0, name: "#{group_name}", type: 'Configuration' })
       group = @api_resource.get("getEntityByName?#{params}")
       json_body = JSON.parse(group.body)
       raise ERRORS[:no_group] if json_body['data'].nil?
