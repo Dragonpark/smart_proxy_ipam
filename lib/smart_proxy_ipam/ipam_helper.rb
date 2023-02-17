@@ -15,7 +15,7 @@ module Proxy::Ipam::IpamHelper
     no_groups: 'No groups found in External IPAM',
     no_subnet: 'Subnet not found in External IPAM',
     no_subnets_in_group: 'No subnets found in External IPAM group',
-    provider: "The IPAM provider must be specified(e.g. 'phpipam' or 'netbox')",
+    provider: "The IPAM provider must be specified(e.g. 'phpipam', 'netbox', or 'bluecat')",
     groups_not_supported: 'Groups are not supported',
     add_ip: 'Error adding IP to External IPAM',
     bad_mac: 'Mac address is invalid',
