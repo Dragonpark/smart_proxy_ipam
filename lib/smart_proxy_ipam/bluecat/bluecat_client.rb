@@ -45,7 +45,25 @@ module Proxy::Bluecat
       subnet = subnet_from_result(json_body['results'][0])
       return subnet if json_body['results']
     end
+    
+    def get_ipam_groups
+      params = URI.encode_www_form({ type: 'Configuration', parentId: 0, count: 100, start: 0 })
+      response = @api_resource.get("getEntities?#{params}")
+      json_body = JSON.parse(response.body)
+      groups = []
 
+      return groups if json_body['count'].zero?
+
+      json_body['results'].each do |group|
+        groups.push({
+          name: group['name'],
+          description: group['properties'].split("|")[0].split("=")[1]
+        })
+      end
+
+      groups
+    end
+    
     def get_ipam_group(group_name)
       return nil if group_name.nil?
       params = URI.encode_www_form({ parentId: 0, name: group_name, type: 'Configuration' })
