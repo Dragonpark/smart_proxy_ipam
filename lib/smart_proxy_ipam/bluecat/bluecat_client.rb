@@ -17,6 +17,7 @@ module Proxy::Bluecat
     include Proxy::Ipam::IpamValidator
 
     def initialize(conf)
+      @conf = conf
       @api_base = "#{conf[:url]}/Services/REST/v1/"
       @default_group = "#{conf[:default_group]}"
       @token = authenticate
