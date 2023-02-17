@@ -116,7 +116,7 @@ module Proxy::Bluecat
 
     private
 
-    def authenicate
+    def authenticate
       auth_uri = URI("#{@api_base}login?username=#{@conf[:user]}&password=#{@conf[:password]}")
       request = Net::HTTP::Get.new(auth_uri)
       request['Content-Type'] = 'application/json'
