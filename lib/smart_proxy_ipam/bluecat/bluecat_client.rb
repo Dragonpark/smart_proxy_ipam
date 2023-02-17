@@ -37,7 +37,7 @@ module Proxy::Bluecat
 
     def get_ipam_subnet_by_cidr(cidr)
       params = URI.encode_www_form({ types: 'IP4Network', keyword: cidr, count: 10, start: 0 })
-      response = @api_resource.get("searchByObjectTypes/?#{params}")
+      response = @api_resource.get("searchByObjectTypes?#{params}")
       json_body = JSON.parse(response.body)
       return nil if json_body['count'].zero?
       subnet = subnet_from_result(json_body['results'][0])
@@ -47,7 +47,7 @@ module Proxy::Bluecat
     def get_ipam_group(group_name)
       return nil if group_name.nil?
       params = URI.encode_www_form({ parentId: 0, name: group_name, type: 'Configuration' })
-      group = @api_resource.get("getEntityByName/#{params}")
+      group = @api_resource.get("getEntityByName?#{params}")
       json_body = JSON.parse(group.body)
       raise ERRORS[:no_group] if json_body['data'].nil?
 
@@ -74,7 +74,7 @@ module Proxy::Bluecat
       properties = "Notes=Address auto added by Foreman|name="
       params = URI.encode_www_form({ action: 'MAKE_STATIC', configurationId: group_id, hostInfo: '', ip4Address: ip, properties: 'Notes=Created by Foreman' })
 
-      response = @api_resource.post("assignIP4Address/#{params}")
+      response = @api_resource.post("assignIP4Address?#{params}")
       return nil if response.code != '200'
       { error: "Unable to add #{address} in External IPAM server" }
     end
@@ -82,7 +82,7 @@ module Proxy::Bluecat
     def delete_ip_from_subnet(ip, params)
       params = URI.encode_www_form({ types: 'IP4Address', keyword: ip, count: 10, start: 0 })
       
-      response = @api_resource.delete("searchByObjectTypes/?#{params}")
+      response = @api_resource.delete("searchByObjectTypes?#{params}")
       json_body = JSON.parse(response.body)
 
       return { error: ERRORS[:no_ip] } if json_body['count'].zero?
@@ -98,7 +98,7 @@ module Proxy::Bluecat
       subnet = get_ipam_subnet(cidr, group_name)
       raise ERRORS[:no_subnet] if subnet.nil?
       params = URI.encode_www_form({ parentId: subnet['parentId'] })
-      response = @api_resource.get("getNextAvailableIP4Address/?#{params}")
+      response = @api_resource.get("getNextAvailableIP4Address?#{params}")
       json_body = JSON.parse(response.body)
       return nil if json_body.empty?
       ip = json_body
