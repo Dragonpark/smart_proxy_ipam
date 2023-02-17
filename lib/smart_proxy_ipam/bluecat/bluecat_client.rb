@@ -28,6 +28,7 @@ module Proxy::Bluecat
 
     def get_ipam_subnet(cidr, group_name = nil)
       if group_name.nil? || group_name.empty?
+        logger.debug(@default_group)
         group_id =  get_group_id(@default_group)
       else
         group_id = get_group_id(group_name)
