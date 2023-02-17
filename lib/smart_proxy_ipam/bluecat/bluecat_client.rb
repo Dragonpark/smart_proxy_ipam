@@ -126,8 +126,6 @@ module Proxy::Bluecat
       if response.code == '200'
         token = response.body.split()[2] + " " + response.body.split()[3]
       end
-      
-      return token
     end
 
     def subnet_from_result(result)
