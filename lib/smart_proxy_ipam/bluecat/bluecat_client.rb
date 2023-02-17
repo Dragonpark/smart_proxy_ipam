@@ -108,7 +108,7 @@ module Proxy::Bluecat
     end
 
     def groups_supported?
-      false
+      true
     end
 
     def authenticated?
