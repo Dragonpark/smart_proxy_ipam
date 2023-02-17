@@ -4,7 +4,7 @@ module Proxy::Bluecat
 
     requires :externalipam, Proxy::Ipam::VERSION
     validate :url, url: true
-    validate_presence :token
+    validate_presence :user, :password
 
     load_classes(proc do
       require 'smart_proxy_ipam/bluecat/bluecat_client'
