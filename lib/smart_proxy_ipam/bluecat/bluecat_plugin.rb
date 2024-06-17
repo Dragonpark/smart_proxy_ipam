@@ -3,7 +3,7 @@ module Proxy::Bluecat
     plugin :externalipam_bluecat, Proxy::Ipam::VERSION
 
     requires :externalipam, Proxy::Ipam::VERSION
-    validate :verify_ssl, verify_ssl: true
+    #validate :verify_ssl, verify_ssl: true
     validate_presence :user, :password, :url
 
     load_classes(proc do
