@@ -18,8 +18,8 @@ module Proxy::Bluecat
 
     def initialize(conf)
       @conf = conf
-      @api_base = "#{conf[:url]}/Services/REST/v1/"
-      @default_group = conf[:default_group]
+      @api_base = "/Services/REST/v1/"
+      @default_group = @conf[:default_group]
       @token = authenticate
       @api_resource = Proxy::Ipam::ApiResource.new(api_base: @api_base, token: "#{@token}")
       @ip_cache = Proxy::Ipam::IpCache.instance
@@ -138,9 +138,15 @@ module Proxy::Bluecat
 
     def authenticate
       auth_uri = URI("#{@api_base}login")
+      
       params = { username: @conf[:user], password: @conf[:password] }
+      auth_uri.query = URI.encode_www_form(params)
+
       request = Net::HTTP::Get.new(auth_uri)
       request['Content-Type'] = 'application/json'
+
+      
+
       response = Net::HTTP.start(auth_uri.hostname, auth_uri.port, use_ssl: auth_uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
         http.request(request)
       end
