@@ -13,5 +13,4 @@ Gem::Specification.new do |s|
   s.files = Dir['{lib,settings.d,bundler.d}/**/*'] + s.extra_rdoc_files
   s.homepage = 'http://github.com/grizzthedj/smart_proxy_ipam'
   s.license = 'GPL-3.0'
-  s.add_dependency "httparty"
 end

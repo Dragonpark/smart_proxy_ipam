@@ -137,15 +137,11 @@ module Proxy::Bluecat
     private
 
     def authenticate
-      auth_uri = URI("#{@api_base}login")
-      
-      params = { username: @conf[:user], password: @conf[:password] }
-      auth_uri.query = URI.encode_www_form(params)
+      auth_uri = URI("https://#{@conf[:url]}#{@api_base}login")
+      auth_uri.query = "username=#{@conf[:user]}&password=#{@conf[:password]}"
 
       request = Net::HTTP::Get.new(auth_uri)
       request['Content-Type'] = 'application/json'
-
-      
 
       response = Net::HTTP.start(auth_uri.hostname, auth_uri.port, use_ssl: auth_uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
         http.request(request)
