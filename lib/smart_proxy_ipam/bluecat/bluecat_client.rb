@@ -18,7 +18,7 @@ module Proxy::Bluecat
 
     def initialize(conf)
       @conf = conf
-      @api_base = "/Services/REST/v1/"
+      @api_base = "#{conf[:url]}/Services/REST/v1/"
       @default_group = @conf[:default_group]
       @token = authenticate
       @api_resource = Proxy::Ipam::ApiResource.new(api_base: @api_base, token: "#{@token}")
@@ -137,7 +137,7 @@ module Proxy::Bluecat
     private
 
     def authenticate
-      auth_uri = URI("https://#{@conf[:url]}#{@api_base}login")
+      auth_uri = URI("#{@conf[:url]}login")
       auth_uri.query = "username=#{@conf[:user]}&password=#{@conf[:password]}"
 
       request = Net::HTTP::Get.new(auth_uri)
