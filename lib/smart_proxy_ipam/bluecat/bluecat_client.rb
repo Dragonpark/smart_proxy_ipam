@@ -34,16 +34,16 @@ module Proxy::Bluecat
         group_id = get_group_id(group_name)
       end
 
-      get_ipam_subnet_by_cidr(cidr, group_id)
+      get_ipam_subnet_by_cidr(cidr)
     end
 
     def get_ipam_subnet_by_cidr(cidr)
       params = URI.encode_www_form({ types: 'IP4Network', keyword: cidr, count: 10, start: 0 })
       response = @api_resource.get("searchByObjectTypes?#{params}")
       json_body = JSON.parse(response.body)
-      return nil if json_body['count'].zero?
-      subnet = subnet_from_result(json_body['results'][0])
-      return subnet if json_body['results']
+      return nil if json_body.count.zero?
+      subnet = subnet_from_result(json_body[0])
+      return subnet
     end
     
     def get_ipam_groups
@@ -52,9 +52,9 @@ module Proxy::Bluecat
       json_body = JSON.parse(response.body)
       groups = []
 
-      return groups if json_body['count'].zero?
+      return groups if json_body.count.zero?
 
-      json_body['results'].each do |group|
+      json_body.each do |group|
         groups.push({
           name: group['name'],
           description: group['properties'].split("|")[0].split("=")[1]
@@ -69,7 +69,7 @@ module Proxy::Bluecat
       params = URI.encode_www_form({ parentId: 0, name: group_name, type: 'Configuration' })
       group = @api_resource.get("getEntityByName?#{params}")
       json_body = JSON.parse(group.body)
-      raise ERRORS[:no_group] if json_body['data'].nil?
+      raise ERRORS[:no_group] if json_body.count.zero?
 
       data = {
         id: json_body['id'],
@@ -78,7 +78,7 @@ module Proxy::Bluecat
         properties: json_body['properties']
       }
 
-      return data if json_body['data']
+      return data
     end
     
     def get_group_id(group_name)
@@ -92,7 +92,7 @@ module Proxy::Bluecat
       desc = 'Address auto added by Foreman'
       group_id = get_group_id(params[:group_name])
       properties = "Notes=Address auto added by Foreman|name="
-      params = URI.encode_www_form({ action: 'MAKE_STATIC', configurationId: group_id, hostInfo: '', ip4Address: ip, properties: 'Notes=Created by Foreman' })
+      params = URI.encode_www_form({ action: 'MAKE_STATIC', configurationId: group_id, hostInfo: '', ip4Address: ip, properties: properties })
 
       response = @api_resource.post("assignIP4Address?#{params}")
       return nil if response.code != '200'
@@ -117,7 +117,7 @@ module Proxy::Bluecat
     def get_next_ip(mac, cidr, group_name)
       subnet = get_ipam_subnet(cidr, group_name)
       raise ERRORS[:no_subnet] if subnet.nil?
-      params = URI.encode_www_form({ parentId: subnet['parentId'] })
+      params = URI.encode_www_form({ parentId: subnet[:id] })
       response = @api_resource.get("getNextAvailableIP4Address?#{params}")
       json_body = JSON.parse(response.body)
       return nil if json_body.empty?
