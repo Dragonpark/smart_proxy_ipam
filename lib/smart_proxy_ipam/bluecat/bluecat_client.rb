@@ -134,7 +134,7 @@ module Proxy::Bluecat
       params = URI.encode_www_form({keyword: ip, count: 100, start: 0, types: "IP4Address"})
       ip = @api_resource.get("searchByObjectTypes?#{params}")
       json_body = JSON.parse(ip.body)
-      return false if json_body['count'].zero?
+      return false if json_body.count.zero?
       true
     end
 
