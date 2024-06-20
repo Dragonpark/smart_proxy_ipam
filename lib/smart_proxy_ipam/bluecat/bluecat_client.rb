@@ -130,6 +130,14 @@ module Proxy::Bluecat
       true
     end
 
+    def ip_exists?(ip, subnet_id, group_name)
+      params = URI.encode_www_form({keyword: ip, count: 100, start: 0, types: "IP4Address"})
+      ip = @api_resource.get("searchByObjectTypes?#{params}")
+      json_body = JSON.parse(ip.body)
+      return false if json_body['count'].zero?
+      true
+    end
+
     def authenticated?
       !@token.nil?
     end
