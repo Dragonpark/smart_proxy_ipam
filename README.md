@@ -5,6 +5,7 @@ Foreman Smart Proxy plugin for IPAM integration with various IPAM providers.
 Currently supported Providers:
 1. [phpIPAM](https://phpipam.net/).
 2. [NetBox](https://github.com/netbox-community/netbox).
+3. [BlueCat Address Manager](https://bluecatnetworks.com/)
 
 ## Installation
 
@@ -26,6 +27,11 @@ Once plugin is installed, you can use an External IPAM to get the next available
 ### NetBox
 1. Obtain an API token via a user profile in Netbox.
 2. Add the token and the url to your NetBox instance to the configuration in `/etc/foreman-proxy/settings.d/externalipam_netbox.yml`
+
+### BlueCat
+NOTE: Currently only works with the legacy v1 API. Support for API v2 will come in the future.
+1. Create a User with a password in BlueCat
+2. Add the user, password, url, and a default group name (Tenant?). Each subnet can specify a group name (Tentant?) if it is not in the default.
 
 ## Local development
 
@@ -58,7 +64,8 @@ gem 'smart_proxy_ipam', :path => '/path/to/smart_proxy_ipam'
 6. Copy `config/settings.d/externalipam.yml.example` to `config/settings.d/externalipam.yml`, and set `enabled` to true, and `use_provider` to `externalipam_phpipam` or `externalipam_netbox`.
 7. Copy `config/settings.d/externalipam_phpipam.yml.example` to `config/settings.d/externalipam_phpipam.yml` and replace values with your phpIPAM URL and credentials.
 8. Copy `config/settings.d/externalipam_netbox.yml.example` to `config/settings.d/externalipam_netbox.yml` and replace values with your Netbox URL and API token.
-9. From Smart Proxy root directory run ...
+9. Copy `config/settings.d/externalipam_bluecat.yml.example` to `config/settings.d/externalipam_bluecat.yml` and replace values with your Bluecat URL and credentials.
+10. From Smart Proxy root directory run ...
 ```
 bundle install
 bundle exec smart-proxy start

@@ -104,12 +104,14 @@ module Proxy::Bluecat
     end
 
     def delete_ip_from_subnet(ip, params)
+      # Be sure to ignore issues if IP address is not already assigned.
+      # Only try to delete if IP is assigned
       params = URI.encode_www_form({ types: 'IP4Address', keyword: ip, count: 10, start: 0 })
       
       response = @api_resource.delete("searchByObjectTypes?#{params}")
       json_body = JSON.parse(response.body)
 
-      return { error: ERRORS[:no_ip] } if json_body['count'].zero?
+      return nil if json_body['count'].zero?
 
       address_id = json_body[0]['id']
       params = URI.encode_www_form({ objectId: address_id})
