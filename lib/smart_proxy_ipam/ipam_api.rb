@@ -315,7 +315,7 @@ module Proxy::Ipam
 
       begin
         validate_required_params!([:address, :ip, :prefix], params)
-        logger.warn(params)
+
         ip = validate_ip!(params[:ip])
         cidr = validate_cidr!(params[:address], params[:prefix])
         group_name = get_request_group(params)
@@ -327,7 +327,7 @@ module Proxy::Ipam
 
         ip_added = provider.add_ip_to_subnet(ip, add_ip_params) # Returns nil on success
         halt 500, ip_added.to_json unless ip_added.nil?
-        logger.warn('Added IP #{ip} for host in IPAM')
+        logger.warn(ip_added)
         status 201
       rescue Proxy::Validations::Error => e
         logger.warn(e.message)
