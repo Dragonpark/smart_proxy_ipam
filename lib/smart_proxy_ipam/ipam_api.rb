@@ -47,7 +47,7 @@ module Proxy::Ipam
         validate_required_params!([:address, :prefix], params)
 
         mac_param = params[:mac]
-        logger.debug(params)
+        logger.warn(params)
         mac = validate_mac!(params[:mac]) unless mac_param.nil? || mac_param.empty?
         cidr = validate_cidr!(params[:address], params[:prefix])
         group_name = get_request_group(params)
