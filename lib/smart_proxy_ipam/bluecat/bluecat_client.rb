@@ -95,9 +95,8 @@ module Proxy::Bluecat
       else
         group_id = get_group_id(group_name)
       end
-      desc = 'Address auto added by Foreman'
 
-      properties = "Notes=Address auto added by Foreman|name="
+      properties = ""
       params = URI.encode_www_form({ action: 'MAKE_STATIC', configurationId: group_id, hostInfo: '', ip4Address: ip, properties: properties })
       logger.warn(params)
       response = @api_resource.post("assignIP4Address?#{params}")
