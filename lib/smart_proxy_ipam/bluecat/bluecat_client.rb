@@ -98,10 +98,9 @@ module Proxy::Bluecat
 
       properties = ""
       params = URI.encode_www_form({ action: 'MAKE_STATIC', configurationId: group_id, hostInfo: '', ip4Address: ip, properties: properties })
-      logger.warn(params)
       response = @api_resource.post("assignIP4Address?#{params}")
       return nil if response.code != '200'
-      { error: "Unable to add #{address} in External IPAM server" }
+      { error: "Unable to add #{ip} in External IPAM server" }
     end
 
     def delete_ip_from_subnet(ip, params)
