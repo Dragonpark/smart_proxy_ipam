@@ -99,8 +99,7 @@ module Proxy::Bluecat
       properties = ""
       params = URI.encode_www_form({ action: 'MAKE_STATIC', configurationId: group_id, hostInfo: '', ip4Address: ip, properties: properties })
       response = @api_resource.post("assignIP4Address?#{params}")
-      return nil if response.code != '200'
-      logger.warn(response.body)
+      return nil if response.code != '201'
       { error: "Unable to add #{ip} in External IPAM server" }
     end
 
