@@ -114,7 +114,7 @@ module Proxy::Bluecat
       address_id = json_body[0]['id']
       params = URI.encode_www_form({ objectId: address_id})
       response = @api_resource.delete("delete/#{params}/")
-      return nil if response.code != '200'
+      return nil if response.code != '204'
       { error: "Unable to delete #{ip} in External IPAM server" }
     end
 
