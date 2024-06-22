@@ -327,7 +327,6 @@ module Proxy::Ipam
 
         ip_added = provider.add_ip_to_subnet(ip, add_ip_params) # Returns nil on success
         halt 500, ip_added.to_json unless ip_added.nil?
-        logger.warn(ip_added)
         status 201
       rescue Proxy::Validations::Error => e
         logger.warn(e.message)
