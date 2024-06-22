@@ -89,11 +89,17 @@ module Proxy::Bluecat
     end
 
     def add_ip_to_subnet(ip, params)       #WIP
+      group_name = params[:group_name]
+      if group_name.nil? || group_name.empty?
+        group_id =  get_group_id(@default_group)
+      else
+        group_id = get_group_id(group_name)
+      end
       desc = 'Address auto added by Foreman'
-      logger.warn(params)
-      group_id = get_group_id(params[:group_name])
+
       properties = "Notes=Address auto added by Foreman|name="
       params = URI.encode_www_form({ action: 'MAKE_STATIC', configurationId: group_id, hostInfo: '', ip4Address: ip, properties: properties })
+      logger.warn(params)
       response = @api_resource.post("assignIP4Address?#{params}")
       return nil if response.code != '200'
       { error: "Unable to add #{address} in External IPAM server" }

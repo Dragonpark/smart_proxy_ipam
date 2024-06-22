@@ -315,7 +315,7 @@ module Proxy::Ipam
 
       begin
         validate_required_params!([:address, :ip, :prefix], params)
-        logger.warn(params)
+
         ip = validate_ip!(params[:ip])
         cidr = validate_cidr!(params[:address], params[:prefix])
         group_name = get_request_group(params)
