@@ -111,7 +111,7 @@ module Proxy::Bluecat
       response = @api_resource.delete("searchByObjectTypes?#{params}")
       json_body = JSON.parse(response.body)
       raise ERRORS[:no_connection] if response.code != '200'
-      return nil if json_body['count'].zero?
+      return nil if json_body.count.zero?
 
       address_id = json_body[0]['id']
       params = URI.encode_www_form({ objectId: address_id})
