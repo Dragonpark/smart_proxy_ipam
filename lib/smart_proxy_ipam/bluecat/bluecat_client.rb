@@ -108,9 +108,8 @@ module Proxy::Bluecat
       # Only try to delete if IP is assigned
       params = URI.encode_www_form({ types: 'IP4Address', keyword: ip, count: 10, start: 0 })
       
-      response = @api_resource.delete("searchByObjectTypes?#{params}")
+      response = @api_resource.get("searchByObjectTypes?#{params}")
       json_body = JSON.parse(response.body)
-      logger.warn(response.code)
       raise ERRORS[:no_connection] if response.code != '200'
       return nil if json_body.count.zero?
 
