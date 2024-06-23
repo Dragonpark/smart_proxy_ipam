@@ -110,6 +110,7 @@ module Proxy::Bluecat
       
       response = @api_resource.delete("searchByObjectTypes?#{params}")
       json_body = JSON.parse(response.body)
+      logger.warn(response.code)
       raise ERRORS[:no_connection] if response.code != '200'
       return nil if json_body.count.zero?
 
