@@ -148,6 +148,8 @@ module Proxy::Bluecat
       !@token.nil?
     end
 
+    private
+
     def authenticate
       auth_uri = URI("#{@api_base}login")
       auth_uri.query = "username=#{@conf[:user]}&password=#{@conf[:password]}"
