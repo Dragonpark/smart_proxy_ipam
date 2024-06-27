@@ -103,9 +103,8 @@ module Proxy::Ipam::IpamHelper
   end
 
   def get_request_group(params)
-    logger.warn(params)
-    logger.warn(URI)
-    group = params[:group] ? URI.escape(URI.decode(params[:group])) : nil
+    p = URI::Parser.new
+    group = params[:group] ? p.escape(URI.decode(params[:group])) : nil
     halt 500, { error: errors[:groups_not_supported] }.to_json if group && !provider.groups_supported?
     group
   end
