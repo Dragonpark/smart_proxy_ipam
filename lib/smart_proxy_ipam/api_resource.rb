@@ -21,8 +21,8 @@ module Proxy::Ipam
       request = Net::HTTP::Get.new(uri)
       request[@auth_header] = @token
       request['Accept'] = 'application/json'
-
-      Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+   #, :verify_mode => OpenSSL::SSL::VERIFY_NONE
+      Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https') do |http|
         http.request(request)
       end
     end
@@ -33,7 +33,7 @@ module Proxy::Ipam
       request[@auth_header] = @token
       request['Accept'] = 'application/json'
 
-      Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+      Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https') do |http|
         http.request(request)
       end
     end
@@ -46,7 +46,7 @@ module Proxy::Ipam
       request['Accept'] = 'application/json'
       request['Content-Type'] = 'application/json'
 
-      Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+      Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https') do |http|
         http.request(request)
       end
     end

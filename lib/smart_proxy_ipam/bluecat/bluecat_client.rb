@@ -157,7 +157,7 @@ module Proxy::Bluecat
       request = Net::HTTP::Get.new(auth_uri)
       request['Content-Type'] = 'application/json'
 
-      response = Net::HTTP.start(auth_uri.hostname, auth_uri.port, use_ssl: auth_uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+      response = Net::HTTP.start(auth_uri.hostname, auth_uri.port, use_ssl: auth_uri.scheme == 'https') do |http|
         http.request(request)
       end
 
