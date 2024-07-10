@@ -21,7 +21,6 @@ module Proxy::Ipam
       request = Net::HTTP::Get.new(uri)
       request[@auth_header] = @token
       request['Accept'] = 'application/json'
-   #, :verify_mode => OpenSSL::SSL::VERIFY_NONE
       Net::HTTP.start(uri.hostname, uri.port, use_ssl: uri.scheme == 'https') do |http|
         http.request(request)
       end
