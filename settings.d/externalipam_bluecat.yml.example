@@ -3,4 +3,3 @@
 :default_group: 1
 :user: 'bluecat_user'
 :password: 'bluecat_password'
-:verify_ssl: true
